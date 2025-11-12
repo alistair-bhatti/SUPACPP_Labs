@@ -6,9 +6,34 @@
 #include <stdio.h>
 #include <string.h>
 
+/*
+void read_data(const std::string &filename, std::vector<float> &data);
 
+void read_data(const std::string &filename, std::vector<float> &data){
+    std::ifstream data_file(filename);
+    std::string line;
+    while (std::getline(data_file, line)) {
+        if (line.empty()) {
+            continue; // skip empty lines
+        }
+        else {
+            float value = std::stof(line);
+            data.push_back(value);
+        }
+    }
+    data_file.close();
+}
 
+*/
 
+/*
+void printVec(const std::vector<float> &vec){
+    for (auto val : vec){
+        std::cout << val << " ";
+    }
+    std::cout << std::endl;
+}
+*/
 
 
 
