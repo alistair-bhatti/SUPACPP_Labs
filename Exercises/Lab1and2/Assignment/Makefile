@@ -10,7 +10,7 @@ ${TARGET}:${OBJECTS} #Make target from objects
 	${CC} ${FLAGS} ${OBJECTS} ${LIBS} -o ${TARGET}
 	@make clean
 
-CustomFunctions.o : CustomFunctions.cxx
+CustomFunctions.o : CustomFunctions.cxx CustomFunctions.h
 	${CC} ${FLAGS} ${LIBS} -c CustomFunctions.cxx
 	
 AnalyseData.o : AnalyseData.cxx
