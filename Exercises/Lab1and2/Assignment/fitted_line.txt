@@ -1,0 +1,4 @@
+Fitted line parameters (y = px + q):
+p (slope): 0.126265
+q (intercept): 2.02628
+y = 0.126265x + 2.02628

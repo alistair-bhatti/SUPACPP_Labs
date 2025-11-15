@@ -23,5 +23,8 @@ int main(){
     std::vector<float> magnitudes = get_vector_magnitudes(data_vector);
 
 
+    std::vector<float> line_params = fit_line_to_Data(data_vector);
+    save_fitted_line_to_file(line_params, "fitted_line.txt");
+
 return 0;
 }

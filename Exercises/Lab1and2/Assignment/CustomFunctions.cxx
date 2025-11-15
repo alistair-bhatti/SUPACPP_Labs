@@ -6,6 +6,14 @@
 #include <string.h>
 #include <cmath>
 
+/*
+read_data: reads data from a specified input file and stores it in a 2D vector.
+Each line in the file is expected to contain two float values separated by a comma.
+Parameters:
+- input_file: A string representing the name of the input file to read data from.
+Returns:
+- a vector of pairs of floats e.g. a vector of x,y pairs.
+*/
 std::vector< std::vector<float> >  read_data(const std::string &input_file){
     std::cout << "Reading data from file: " << input_file << std::endl;
     std::ifstream data_file(input_file);
@@ -19,6 +27,10 @@ std::vector< std::vector<float> >  read_data(const std::string &input_file){
         size_t comma_pos = line.find(',');
         std::string x_str = line.substr(0, comma_pos);
         std::string y_str = line.substr(comma_pos + 1);
+
+        // skip header line if present: this checks every line, so in theory is
+        // quite inefficient, but for small files should be ok
+        // alternatively could be examples to e.g. made sure no non-numeric data is read in
         if (x_str == "x" || y_str == "y") {
             continue; // skip empty lines
         }
@@ -30,7 +42,8 @@ std::vector< std::vector<float> >  read_data(const std::string &input_file){
         all_vecs.push_back(new_vec);
 
 
-        //This prints each line to the terminal as it reads the file
+        // This prints each line to the terminal as it reads the file:
+        // Used for testing funcion works correctly
         /*
         int n = all_vecs.size();
         n -= 1; // adjust for 0 indexing!!!!!!!! .size() otuputs number of elements in human counting
@@ -70,4 +83,47 @@ std::vector<float> get_vector_magnitudes(const std::vector< std::vector<float> >
     // 
 
     return vec_magnitudes;
+}
+
+std::vector<float> fit_line_to_Data(const std::vector< std::vector<float> > &data){
+    // fit a line to the data using least squares regression
+    // y = px + q (y = mx + c)
+    // return m and c as a vector of floats
+    int N = data.size(); //number of pairs of points
+    float sum_x = 0.0;
+    float sum_y = 0.0;
+    float sum_xy = 0.0;
+    float sum_x2 = 0.0;
+
+    for (int i=0; i<N; i++){
+        float x = data[i][0];
+        float y = data[i][1];
+        sum_x += x;
+        sum_y += y;
+        sum_xy += x * y;
+        sum_x2 += x * x;
+    }
+
+    float p = ((N * sum_xy) - (sum_x * sum_y)) / ((N * sum_x2) - (sum_x * sum_x));
+    float q = ((sum_x2 * sum_y) - (sum_xy * sum_x)) / ((N * sum_x2) - (sum_x * sum_x));
+
+    std::vector<float> line_params = {p, q}; // m and c
+    return line_params; 
+
+}
+
+void save_fitted_line_to_file(const std::vector<float> &line_params, const std::string &output_file){
+    std::ofstream out_file(output_file);
+    if (out_file.is_open()){
+        out_file << "Fitted line parameters (y = px + q):" << std::endl;
+        out_file << "p (slope): " << line_params[0] << std::endl;
+        out_file << "q (intercept): " << line_params[1] << std::endl;
+        out_file << "y = " << line_params[0] << "x + " << line_params[1] << std::endl;
+        out_file.close();
+        std::cout << "Fitted line parameters saved to file: " << output_file << std::endl;
+        std::cout << "y = " << line_params[0] << "x + " << line_params[1] << std::endl;
+    }
+    else {
+        std::cerr << "Error: Could not open file " << output_file << " for writing." << std::endl;
+    }
 }
