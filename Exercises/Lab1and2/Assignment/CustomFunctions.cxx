@@ -85,6 +85,34 @@ std::vector<float> get_vector_magnitudes(const std::vector< std::vector<float> >
     return vec_magnitudes;
 }
 
+
+float chi_sqrd_test(const std::vector< std::vector<float> > data, const std::vector<float> line_params){
+    // calculate chi squared value for the line fit to the data
+    // chi^2 = sum((y_i - (px_i + q))^2 / sigma_i^2)
+    // assuming sigma_i = 1 for all points
+    int M = data.size();
+    float chi_sqrd = 0.0;
+    float p = line_params[0];
+    float q = line_params[1];
+
+    std::vector< std::vector<float> > standard_error = read_data("error2D_float.txt");
+    int S = standard_error.size();
+    if (S != M){
+        std::cerr << "Error: error file does not contain the correct number of lines." << std::endl;
+        std::cerr << "Expected " << M << " lines, but got " << S << " lines." << std::endl;
+        return -1.0;
+    }
+
+    for (int i=0; i<M; i++){
+        float x = data[i][0];
+        float y = data[i][1];
+        float y_fitted = p * x + q;
+        chi_sqrd += ((y - y_fitted) * (y - y_fitted)) / (standard_error[i][0]); // 
+    }
+
+    return chi_sqrd;
+}
+
 std::vector<float> fit_line_to_Data(const std::vector< std::vector<float> > &data){
     // fit a line to the data using least squares regression
     // y = px + q (y = mx + c)
@@ -107,10 +135,13 @@ std::vector<float> fit_line_to_Data(const std::vector< std::vector<float> > &dat
     float p = ((N * sum_xy) - (sum_x * sum_y)) / ((N * sum_x2) - (sum_x * sum_x));
     float q = ((sum_x2 * sum_y) - (sum_xy * sum_x)) / ((N * sum_x2) - (sum_x * sum_x));
 
-    std::vector<float> line_params = {p, q}; // m and c
+    float chi_sqrd = chi_sqrd_test(data, {p, q});
+    std::vector<float> line_params = {p, q, chi_sqrd}; // m and c
     return line_params; 
 
 }
+
+
 
 void save_fitted_line_to_file(const std::vector<float> &line_params, const std::string &output_file){
     std::ofstream out_file(output_file);
@@ -118,9 +149,11 @@ void save_fitted_line_to_file(const std::vector<float> &line_params, const std::
         out_file << "Fitted line parameters (y = px + q):" << std::endl;
         out_file << "p (slope): " << line_params[0] << std::endl;
         out_file << "q (intercept): " << line_params[1] << std::endl;
+        out_file << "Chi-squared: " << line_params[2] << std::endl;
         out_file << "y = " << line_params[0] << "x + " << line_params[1] << std::endl;
         out_file.close();
         std::cout << "Fitted line parameters saved to file: " << output_file << std::endl;
+        std::cout << "chi^2:" << line_params[2] << std::endl;
         std::cout << "y = " << line_params[0] << "x + " << line_params[1] << std::endl;
     }
     else {
@@ -128,7 +161,8 @@ void save_fitted_line_to_file(const std::vector<float> &line_params, const std::
     }
 }
 
-
+/*
+// Why didn't this one work comapred to as below?
 template<typename T>
 void print_file_lines(T data){
     for (auto &i : data) {
@@ -137,11 +171,10 @@ void print_file_lines(T data){
 }
 
 
-/*
-void print_file_lines(std::vector<float> data){
-    for (auto &i : data) {
+*/
+
+void print_file_lines(std::vector<float> magnitude_data){
+    for (auto &i : magnitude_data) {
         std::cout << i << std::endl;
     }
 }
-
-*/

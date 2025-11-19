@@ -13,6 +13,7 @@ void print_data(const std::vector< std::vector<float> > &data=read_data(), int N
 
 std::vector<float> get_vector_magnitudes(const std::vector< std::vector<float> > &all_vecs=read_data());
 
+float chi_sqrd_test(const std::vector< std::vector<float> > data, const std::vector<float> line_params);
 
 std::vector<float> fit_line_to_Data(const std::vector< std::vector<float> > &data=read_data());
 
