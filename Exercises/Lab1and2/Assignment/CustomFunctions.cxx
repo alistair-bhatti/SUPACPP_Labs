@@ -127,3 +127,21 @@ void save_fitted_line_to_file(const std::vector<float> &line_params, const std::
         std::cerr << "Error: Could not open file " << output_file << " for writing." << std::endl;
     }
 }
+
+
+template<typename T>
+void print_file_lines(T data){
+    for (auto &i : data) {
+        std::cout << i << std::endl;
+    }
+}
+
+
+/*
+void print_file_lines(std::vector<float> data){
+    for (auto &i : data) {
+        std::cout << i << std::endl;
+    }
+}
+
+*/

@@ -1,3 +1,5 @@
+#Based very heavily on the pre-written makefike from Lab3and4!!!
+
 CC=g++ #Name of compiler
 FLAGS=-std=c++20 -w #Compiler flags (the s makes it silent)
 TARGET=AnalyseData_program #Executable name
