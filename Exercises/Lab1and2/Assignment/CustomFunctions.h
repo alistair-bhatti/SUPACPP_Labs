@@ -19,6 +19,13 @@ std::vector<float> fit_line_to_Data(const std::vector< std::vector<float> > &dat
 
 void save_fitted_line_to_file(const std::vector<float> &line_params, const std::string &output_file="fitted_line.txt");
 
+float x_pow_y_cal(float x=2.1, int y=4);
+
+std::vector<float> x_pow_y_calculator(const std::vector< std::vector<float> > &data);
+
+void save_vector_to_file(const std::vector<float> &data, const std::string &output_file);
+
+
 /*
 template<typename T>
 void print_lines(T data);

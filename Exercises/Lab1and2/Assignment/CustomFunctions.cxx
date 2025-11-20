@@ -113,6 +113,35 @@ float chi_sqrd_test(const std::vector< std::vector<float> > data, const std::vec
     return chi_sqrd;
 }
 
+float x_pow_y_cal(float x, int y){
+    // calculate x^y without using in-built pow or for loops
+    if (y == 0){ // many data points from input2D_float.txt will round to y=0
+        return 1.0;
+    }
+    else if (y < 0){ // no -ve poitns in the file, but there could be!
+        return 1.0 / x_pow_y_cal(x, -y);
+    }
+    else{ //"normal" case
+        return x * x_pow_y_cal(x, y - 1);
+    }
+}
+
+std::vector<float> x_pow_y_calculator(const std::vector< std::vector<float> > &data){
+    // calculate x^y for each data point without using a for loop or any in-built power functions
+    // using std::transform and a lambda function
+    std::vector<float> x_pow_y;
+    int M = data.size();
+    x_pow_y.resize(M); // single column, same size at ttohe number of data points
+
+    for (int i=0; i<M; i++){ // loop is to get x^y all points, but each point does not use a loop or pow function
+        float x = data[i][0]; //select row then column
+        int y = std::round(data[i][1]);
+
+        x_pow_y[i] = x_pow_y_cal(x, y); // The power x^y is calcualted without use of pow or a for loop: used recursion
+    }
+    return x_pow_y;
+}
+
 std::vector<float> fit_line_to_Data(const std::vector< std::vector<float> > &data){
     // fit a line to the data using least squares regression
     // y = px + q (y = mx + c)
@@ -161,8 +190,22 @@ void save_fitted_line_to_file(const std::vector<float> &line_params, const std::
     }
 }
 
+void save_vector_to_file(const std::vector<float> &data, const std::string &output_file){
+    std::ofstream out_file(output_file);
+    if (out_file.is_open()){
+        for (const auto &val : data){
+            out_file << val << std::endl;
+        }
+        out_file.close();
+        std::cout << "Data saved to file: " << output_file << std::endl;
+    }
+    else {
+        std::cerr << "Error: Could not open file " << output_file << " for writing." << std::endl;
+    }
+}
+
 /*
-// Why didn't this one work comapred to as below?
+// Why didn't this function work wheras non-tempalte version below does?
 template<typename T>
 void print_file_lines(T data){
     for (auto &i : data) {
