@@ -5,6 +5,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <cmath>
+#include "FiniteFunctions.h"
+#include "CustomFunctions.h"
+#include <filesystem>
+#pragma once
+
+using std::filesystem::path;
 
 /*
 read_data: reads data from a specified input file and stores it in a 2D vector.
@@ -56,168 +62,113 @@ std::vector< std::vector<float> >  read_data(const std::string &input_file){
     return all_vecs;
 }
 
-void print_data(const std::vector< std::vector<float> > &data, int N_lines){
-    std::cout << "Printing first " << N_lines << " lines of data:" << std::endl;
-    int total_lines = data.size();
-    if (N_lines > total_lines){
-        N_lines = total_lines;
-        std::cout << "Note: there are only " << total_lines << " lines of data available." << std::endl;
-    }
-    for (int i=0; i<N_lines; i++){
-        std::cout << "line " << i+1 << ", x: " << data[i][0] << ", y: " << data[i][1]  << std::endl;
-    }
-}
 
-std::vector<float> get_vector_magnitudes(const std::vector< std::vector<float> > &all_vecs){
-    std::vector<float> vec_magnitudes;
-    int number_vecs = all_vecs.size();
-    float new_vec_mag;
-    for (int i=0; i<number_vecs; i++){
-        std::vector<float> vec = all_vecs[i];
-        new_vec_mag = std::sqrt( vec[0]*vec[0] + vec[1]*vec[1] );
-        vec_magnitudes.push_back(new_vec_mag);
-
-        // print to screen checking magnitudes calculated correctly
-        // std::cout << "The magnitude of vector " << i+1 << " (" << vec[0] << ", " << vec[1] << ") is " << new_vec_mag << std::endl;
-    }
-    // 
-
-    return vec_magnitudes;
-}
-
-
-float chi_sqrd_test(const std::vector< std::vector<float> > data, const std::vector<float> line_params){
-    // calculate chi squared value for the line fit to the data
-    // chi^2 = sum((y_i - (px_i + q))^2 / sigma_i^2)
-    // assuming sigma_i = 1 for all points
-    int M = data.size();
-    float chi_sqrd = 0.0;
-    float p = line_params[0];
-    float q = line_params[1];
-
-    std::vector< std::vector<float> > standard_error = read_data("error2D_float.txt");
-    int S = standard_error.size();
-    if (S != M){
-        std::cerr << "Error: error file does not contain the correct number of lines." << std::endl;
-        std::cerr << "Expected " << M << " lines, but got " << S << " lines." << std::endl;
-        return -1.0;
-    }
-
-    for (int i=0; i<M; i++){
-        float x = data[i][0];
-        float y = data[i][1];
-        float y_fitted = p * x + q;
-        chi_sqrd += ((y - y_fitted) * (y - y_fitted)) / (standard_error[i][0]); // 
-    }
-
-    return chi_sqrd;
-}
-
-float x_pow_y_cal(float x, int y){
-    // calculate x^y without using in-built pow or for loops
-    if (y == 0){ // many data points from input2D_float.txt will round to y=0
-        return 1.0;
-    }
-    else if (y < 0){ // no -ve poitns in the file, but there could be!
-        return 1.0 / x_pow_y_cal(x, -y);
-    }
-    else{ //"normal" case
-        return x * x_pow_y_cal(x, y - 1);
-    }
-}
-
-std::vector<float> x_pow_y_calculator(const std::vector< std::vector<float> > &data){
-    // calculate x^y for each data point without using a for loop or any in-built power functions
-    // using std::transform and a lambda function
-    std::vector<float> x_pow_y;
-    int M = data.size();
-    x_pow_y.resize(M); // single column, same size at ttohe number of data points
-
-    for (int i=0; i<M; i++){ // loop is to get x^y all points, but each point does not use a loop or pow function
-        float x = data[i][0]; //select row then column
-        int y = std::round(data[i][1]);
-
-        x_pow_y[i] = x_pow_y_cal(x, y); // The power x^y is calcualted without use of pow or a for loop: used recursion
-    }
-    return x_pow_y;
-}
-
-std::vector<float> fit_line_to_Data(const std::vector< std::vector<float> > &data){
-    // fit a line to the data using least squares regression
-    // y = px + q (y = mx + c)
-    // return m and c as a vector of floats
-    int N = data.size(); //number of pairs of points
-    float sum_x = 0.0;
-    float sum_y = 0.0;
-    float sum_xy = 0.0;
-    float sum_x2 = 0.0;
-
-    for (int i=0; i<N; i++){
-        float x = data[i][0];
-        float y = data[i][1];
-        sum_x += x;
-        sum_y += y;
-        sum_xy += x * y;
-        sum_x2 += x * x;
-    }
-
-    float p = ((N * sum_xy) - (sum_x * sum_y)) / ((N * sum_x2) - (sum_x * sum_x));
-    float q = ((sum_x2 * sum_y) - (sum_xy * sum_x)) / ((N * sum_x2) - (sum_x * sum_x));
-
-    float chi_sqrd = chi_sqrd_test(data, {p, q});
-    std::vector<float> line_params = {p, q, chi_sqrd}; // m and c
-    return line_params; 
-
-}
-
-
-
-void save_fitted_line_to_file(const std::vector<float> &line_params, const std::string &output_file){
-    std::ofstream out_file(output_file);
-    if (out_file.is_open()){
-        out_file << "Fitted line parameters (y = px + q):" << std::endl;
-        out_file << "p (slope): " << line_params[0] << std::endl;
-        out_file << "q (intercept): " << line_params[1] << std::endl;
-        out_file << "Chi-squared: " << line_params[2] << std::endl;
-        out_file << "y = " << line_params[0] << "x + " << line_params[1] << std::endl;
-        out_file.close();
-        std::cout << "Fitted line parameters saved to file: " << output_file << std::endl;
-        std::cout << "chi^2:" << line_params[2] << std::endl;
-        std::cout << "y = " << line_params[0] << "x + " << line_params[1] << std::endl;
-    }
-    else {
-        std::cerr << "Error: Could not open file " << output_file << " for writing." << std::endl;
-    }
-}
-
-void save_vector_to_file(const std::vector<float> &data, const std::string &output_file){
-    std::ofstream out_file(output_file);
-    if (out_file.is_open()){
-        for (const auto &val : data){
-            out_file << val << std::endl;
-        }
-        out_file.close();
-        std::cout << "Data saved to file: " << output_file << std::endl;
-    }
-    else {
-        std::cerr << "Error: Could not open file " << output_file << " for writing." << std::endl;
-    }
-}
 
 /*
-// Why didn't this function work wheras non-tempalte version below does?
-template<typename T>
-void print_file_lines(T data){
-    for (auto &i : data) {
-        std::cout << i << std::endl;
-    }
-}
+
+
+Normal distribution class inheriting from FiniteFunction
 
 
 */
 
-void print_file_lines(std::vector<float> magnitude_data){
-    for (auto &i : magnitude_data) {
-        std::cout << i << std::endl;
-    }
+
+
+NormalDist::NormalDist(){
+    m_RMin = -5.0;
+    m_RMax = +5.0;
+    double m_Mean = 0.0;
+    double m_StdDev = 1.0;
+    this->checkPath("norm_default_output"); //Use provided string to name output files
 }
+
+NormalDist::NormalDist(double mean, double stddev, double range_min, double range_max, std::string outfile){
+    m_RMin = range_min;
+    m_RMax = range_max;
+    double m_Mean = mean;
+    double m_StdDev = stddev;
+    this->checkPath(outfile); //Use provided string to name output files
+}
+
+void NormalDist::setmean(double mean) {m_Mean = mean;};
+void NormalDist::setstddev(double stddev) {m_StdDev = stddev;};
+
+double NormalDist::mean() {return m_Mean;};
+double NormalDist::stddev() {return m_StdDev;};
+
+void NormalDist::printInfo(){
+    std::cout << "Normal Distribution Function Info:" << std::endl;
+    std::cout << "Integral: " << m_Integral << ", calculated using " << m_IntDiv << " divisions" << std::endl;
+    std::cout << "Mean: " << m_Mean << std::endl;
+    std::cout << "Standard Deviation: " << m_StdDev << std::endl;
+    std::cout << "Range Min: " << m_RMin << std::endl;
+    std::cout << "Range Max: " << m_RMax << std::endl;
+}
+
+
+
+double NormalDist::norm_dist(double x, double m_Mean, double m_StdDev) {
+        // Calculate the normal distribution value at x
+    double coeff = 1.0 / (m_StdDev * std::sqrt(2.0 * M_PI));
+    double exponent = -0.5 * std::pow((x - m_Mean) / m_StdDev, 2);
+    return coeff * std::exp(exponent);
+
+}
+
+double NormalDist::callFunction(double x) {return this->norm_dist(x, m_Mean, m_StdDev);};
+
+
+
+/*
+
+
+Cauchy-Lorentz distribution class inheriting from FiniteFunction
+
+
+*/
+
+
+
+
+CauchyLorentz::CauchyLorentz(){
+    m_RMin = -5.0;
+    m_RMax = +5.0;
+    double gamma = 1.0; // gamma > 0
+    double x_0 = 0.0; // x_0 location offset
+    this->checkPath("cauchy_default_output"); //Use provided string to name output files
+}
+
+CauchyLorentz::CauchyLorentz(double gamma, double x_0, double range_min, double range_max, std::string outfile){
+    m_RMin = range_min;
+    m_RMax = range_max;
+    double m_gamma = gamma;
+    double m_x_0 = x_0;
+    this->checkPath(outfile); //Use provided string to name output files
+}
+
+void CauchyLorentz::setgamma(double gamma) {m_gamma = gamma;};
+void CauchyLorentz::setx_0(double x_0) {m_x_0 = x_0;};
+
+double CauchyLorentz::gamma() {return m_gamma;};
+double CauchyLorentz::x_0() {return m_x_0;};
+
+void CauchyLorentz::printInfo(){
+    std::cout << "Cauchy-Lorentz Distribution Function Info:" << std::endl;
+    std::cout << "Integral: " << m_Integral << ", calculated using " << m_IntDiv << " divisions" << std::endl;
+    std::cout << "Gamma: " << m_gamma << std::endl;
+    std::cout << "x_0: " << m_x_0 << std::endl;
+    std::cout << "Range Min: " << m_RMin << std::endl;
+    std::cout << "Range Max: " << m_RMax << std::endl;
+}
+
+
+
+double CauchyLorentz::cauchy_distr(double x, double m_gamma, double m_x_0) {
+    // Calculate the Cauchy-lorentz distribution value at x
+    double denom_1 = (m_gamma * M_PI);
+    double denom_2 = 1 + std::pow((x - m_x_0) / m_gamma, 2);
+    return (1/(denom_1 * denom_2));
+
+}
+
+double CauchyLorentz::callFunction(double x) {return this->cauchy_distr(x, m_gamma, m_x_0);};
