@@ -1,0 +1,33 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <stdio.h>
+#include <string.h>
+#include <cmath>
+
+
+std::vector< std::vector<float> > read_data(const std::string &input_file="input2D_float.txt");
+
+void print_data(const std::vector< std::vector<float> > &data=read_data(), int N_lines=5);
+
+std::vector<float> get_vector_magnitudes(const std::vector< std::vector<float> > &all_vecs=read_data());
+
+float chi_sqrd_test(const std::vector< std::vector<float> > data, const std::vector<float> line_params);
+
+std::vector<float> fit_line_to_Data(const std::vector< std::vector<float> > &data=read_data());
+
+void save_fitted_line_to_file(const std::vector<float> &line_params, const std::string &output_file="fitted_line.txt");
+
+float x_pow_y_cal(float x=2.1, int y=4);
+
+std::vector<float> x_pow_y_calculator(const std::vector< std::vector<float> > &data);
+
+void save_vector_to_file(const std::vector<float> &data, const std::string &output_file);
+
+
+/*
+template<typename T>
+void print_lines(T data);
+*/
+void print_file_lines(std::vector<float> magnitude_data);
