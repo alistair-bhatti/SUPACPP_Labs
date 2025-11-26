@@ -45,7 +45,7 @@ int main(){
     //---
     // Create Histograms
     //---
-    int N_bins = 50;
+    int N_bins = 100;
     ff.setOutfile("default function and data");
 
 
@@ -83,8 +83,8 @@ int main(){
     std::cout << "----------------------------------------" << std::endl;
 
     // create CauchyLorentz object, with chosen mean & stddev
-    double gamma = 2.0;
-    double x_0 = 0.5;
+    double gamma = 0.5;
+    double x_0 = 2.0;
     CauchyLorentz cl(gamma, x_0, R_min, R_max, "cauchy-lorentz distribution");
     cl.setgamma(gamma);
     cl.setx_0(x_0);
@@ -94,9 +94,25 @@ int main(){
     cl.plotFunction();
 
 
+    std::cout << "----------------------------------------" << std::endl;
+    std::cout << "Now testing crystal ball distribution" << std::endl;
+    std::cout << "----------------------------------------" << std::endl;
 
 
-
+    // create CauchyLorentz object, with chosen n, alpha, mean & stddev
+    double n = 1.5; // n > 1
+    double alpha = 10; // alpha > 0
+    double mean_cb = 2.0;
+    double stddev_cb = 1.0;
+    CrystalBall cb(n, alpha, mean_cb, stddev_cb, R_min, R_max, "crystal ball distribution");
+    cb.setn(n);
+    cb.setalpha(alpha);
+    cb.setmean(mean_cb);
+    cb.setstddev(stddev_cb);
+    cb.integral(10000); // compute integral with 10,000 divisions
+    cb.printInfo();
+    cb.plotData(ff_points_from_data, N_bins, true); // plot data, is data = true
+    cb.plotFunction();
 
 
 

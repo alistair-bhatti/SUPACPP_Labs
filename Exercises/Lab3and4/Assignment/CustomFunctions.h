@@ -47,22 +47,26 @@ protected:
 };
 
 
-/*
 
 class CrystalBall : public FiniteFunction {
 public:
     CrystalBall();
-    CrystalBall(double n, double alpha, double  double range_min, double range_max, std::string outfile);
-    double gamma();
-    double x_0();
-    void setgamma(double gamma);
-    void setx_0(double x_0);
-    double cauchy_distr(double x, double gamma, double x_0);
+    CrystalBall(double n, double alpha, double mean, double stddev, double range_min, double range_max, std::string outfile);
+    double n();
+    double alpha();
+    double mean();
+    double stddev();
+    void setn(double n);
+    void setalpha(double alpha);
+    void setmean(double mean);
+    void setstddev(double stddev);
+    double crystal_dist(double x, double n, double alpha, double mean, double stddev);
     virtual double callFunction(double x) override; // Override the callFunction method
     virtual void printInfo() override; // Override the printInfo method
 protected:
-    double m_gamma;
-    double m_x_0;
-};
+    double m_n;
+    double m_alpha;
+    double m_Mean;
+    double m_StdDev;
 
-*/
+};

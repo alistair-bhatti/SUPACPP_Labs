@@ -172,3 +172,79 @@ double CauchyLorentz::cauchy_distr(double x, double m_gamma, double m_x_0) {
 }
 
 double CauchyLorentz::callFunction(double x) {return this->cauchy_distr(x, m_gamma, m_x_0);};
+
+
+
+/*
+
+
+Crystal ball distribution class inheriting from FiniteFunction
+
+
+*/
+
+
+CrystalBall::CrystalBall(){
+    m_RMin = -5.0;
+    m_RMax = +5.0;
+    double m_n = 2.0; // n > 1
+    double m_alpha = 1.0; // alpha > 0
+    double m_Mean = 0.0;
+    double m_StdDev = 1.0;
+    this->checkPath("crystal_default_output"); 
+}
+
+CrystalBall::CrystalBall(double n, double alpha, double mean, double stddev, double range_min, double range_max, std::string outfile){
+    m_RMin = range_min;
+    m_RMax = range_max;
+    double m_n = n; // n > 1
+    double m_alpha = alpha; // alpha > 0
+    double m_Mean = mean;
+    double m_StdDev = stddev;
+    this->checkPath(outfile); //Use provided string to name output files
+}
+
+void CrystalBall::setn(double n) {m_n = n;};
+void CrystalBall::setalpha(double alpha) {m_alpha = alpha;};
+void CrystalBall::setmean(double mean) {m_Mean = mean;};
+void CrystalBall::setstddev(double stddev) {m_StdDev = stddev;};
+
+double CrystalBall::n() {return m_n;};
+double CrystalBall::alpha() {return m_alpha;};
+double CrystalBall::mean() {return m_Mean;};
+double CrystalBall::stddev() {return m_StdDev;};
+
+void CrystalBall::printInfo(){
+    std::cout << "Crystal ball Distribution Function Info:" << std::endl;
+    std::cout << "Integral: " << m_Integral << ", calculated using " << m_IntDiv << " divisions" << std::endl;
+    std::cout << "n: " << m_n << std::endl;
+    std::cout << "alpha: " << m_alpha << std::endl;
+    std::cout << "mean: " << m_Mean << std::endl;
+    std::cout << "StdDev: " << m_StdDev << std::endl; 
+    std::cout << "Range Min: " << m_RMin << std::endl;
+    std::cout << "Range Max: " << m_RMax << std::endl;
+}
+
+
+
+double CrystalBall::crystal_dist(double x, double n, double alpha, double mean, double stddev) {
+    // Calculate the crystal ball distribution value at x
+    // Huugely inefficient implementation, but works for now!
+    double case_val = (x - mean) / stddev;
+    double A = std::pow(n / std::abs(alpha), n) * std::exp(-0.5 * alpha * alpha);
+    double B = n / std::abs(alpha) - std::abs(alpha);
+    double C = n / std::abs(alpha) * 1.0 / (n - 1.0) * std::exp(-0.5 * alpha * alpha);
+    double D = std::sqrt(M_PI / 2.0) * (1.0 + std::erf(alpha / std::sqrt(2.0)));
+    double N = 1.0 / (stddev * (C + D));
+    if (case_val > -alpha) {
+        return N * std::exp(-0.5 * case_val * case_val);
+    } else {
+        return N * A * std::pow(B - case_val, -n);
+    }
+
+}
+
+double CrystalBall::callFunction(double x) {return this->crystal_dist(x, m_n, m_alpha, m_Mean, m_StdDev);};
+
+
+
