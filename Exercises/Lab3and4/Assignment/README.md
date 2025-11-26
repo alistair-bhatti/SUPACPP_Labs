@@ -15,7 +15,7 @@
 - Key aprameters are towards the top of the main() function in "TestFiniteFunctions.cxx", or in relevant section for fitted function as appropriate.
 - Some example output files with the best model, Cauchy-Lorentz, with params obtained by manual adjustment (gamma = 0.5, x_0 = 2)) are shown in the folder Outputs/png, with names "cauchy-lorentz distribution_exampleX.png", where X is an integer 1,2,3,... 
 - X = 1,2 are examples of when standard deviation = 3.0, X=3,4 are when standard deviation = 0.5, X=5,6 are examples of when stndard deviation = 10.0
-- Sometime there is a core segmentation fault when running!
+- Sometime there is a core segmentation fault when running! - not sure why this is, suspect it is lack of robustness in my metropolis related stuff somehwere.
 
 # Files
 ## Unknown distribution
