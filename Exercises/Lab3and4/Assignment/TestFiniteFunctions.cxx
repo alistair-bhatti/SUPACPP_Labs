@@ -7,8 +7,17 @@
 #include <fstream>
 
 int main(){
+    // Define function range, data file, hsitograms bins
     float R_min = -10.0;
     float R_max = 10.0;
+    std::string data_filename = "Outputs/data/MysteryData15020.txt";
+    int N_bins = 100; // number of bins for hsiograms
+
+    // Metropolis sampling parameters
+    float metro_standard_deviation = 10.0; // for getting y. - 3.0 works ok
+    int metro_samples = 10000;
+
+
     // create default FiniteFunction test object 
     FiniteFunction ff;
     ff.setRangeMin(R_min);
@@ -31,8 +40,8 @@ int main(){
     //FiniteFunction ff_from_Data(-10.0, 10.0, "ff_from_data");
 
 
-    //read file data in to a single column
-    std::vector< std::vector<float> > ff_points_from_data_raw = read_data("Outputs/data/MysteryData15020.txt");
+    //read file data in to a single column - yes this is horrendous but it works ok
+    std::vector< std::vector<float> > ff_points_from_data_raw = read_data(data_filename);
     std::vector< double > ff_points_from_data;
     for (const auto& point_vec : ff_points_from_data_raw) {
         if (!point_vec.empty()) {
@@ -45,11 +54,8 @@ int main(){
     //---
     // Create Histograms
     //---
-    int N_bins = 100;
+
     ff.setOutfile("default function and data");
-
-
-
     
     std::cout << "----------------------------------------" << std::endl;
     std::cout << "Now testing default inv square distribution" << std::endl;
@@ -74,6 +80,8 @@ int main(){
     nd.integral(10000); // compute integral with 10,000 divisions
     nd.printInfo();
     nd.plotData(ff_points_from_data, N_bins, true); // plot data, is data = true
+    std::vector<double> nd_metro_samples = nd.metropolisSample(metro_samples, metro_standard_deviation); 
+    nd.plotData(nd_metro_samples, N_bins, false); 
     nd.plotFunction();
     // default test function
     //ff.plotFunction(); // plot the default function: saves to Outputs/png/
@@ -91,6 +99,9 @@ int main(){
     cl.integral(10000); // compute integral with 10,000 divisions
     cl.printInfo();
     cl.plotData(ff_points_from_data, N_bins, true); // plot data, is data = true
+ 
+    std::vector<double> cl_metro_samples = cl.metropolisSample(metro_samples, metro_standard_deviation); 
+    cl.plotData(cl_metro_samples, N_bins, false); 
     cl.plotFunction();
 
 
@@ -112,6 +123,11 @@ int main(){
     cb.integral(10000); // compute integral with 10,000 divisions
     cb.printInfo();
     cb.plotData(ff_points_from_data, N_bins, true); // plot data, is data = true
+    std::vector<double> cb_metro_samples = cb.metropolisSample(metro_samples, metro_standard_deviation); 
+    cb.plotData(cb_metro_samples, N_bins, false); 
+    cb.plotData(ff_points_from_data, N_bins, true);
+
+
     cb.plotFunction();
 
 

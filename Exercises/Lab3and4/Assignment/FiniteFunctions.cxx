@@ -3,7 +3,8 @@
 #include <vector>
 #include "FiniteFunctions.h"
 #include <filesystem> //To check extensions in a nice way
-
+#include <random>
+#include <chrono>
 #include "gnuplot-iostream.h" //Needed to produce plots (not part of the course) 
 
 using std::filesystem::path;
@@ -181,6 +182,58 @@ std::vector< std::pair<double,double> > FiniteFunction::makeHist(std::vector<dou
   }
   return histdata;
 }
+
+std::vector< double > FiniteFunction::metropolisSample(int Npoints, float standard_deviation){
+    std::vector<double> samples; // stores the final samples
+
+    // Steps 1. - only run once, then loop over steps 3. to 5.
+    // chrono for random from https://stackoverflow.com/questions/60721093/random-number-from-normal-distribution-in-c
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine generator(seed);
+    std::srand(std::time({})); // use current time as seed for random generator x_i
+    int random_int = rand(); // some random number
+    // x_i = lowest position + a random fraction of the total range
+    double x_i = m_RMin + ((random_int / (double)RAND_MAX) * (m_RMax - m_RMin));
+
+    // Set up random number generator for normal distribution
+    //std::random_device rd;
+    //std::mt19937 gen(rd());
+    std::normal_distribution<double> distribution(x_i, standard_deviation);
+    double y = distribution(generator); 
+
+    // print initial values for debugging
+    //std::cout << "Initial random position x_i: " << x_i << ", y: " << y << std::endl;
+
+    // repeat step 3.to 5. for Npoints
+    for (int i=1; i<Npoints; i++){
+        double y = distribution(generator);
+        //Step 3.
+        double f_of_x_i = this->callFunction(x_i);
+        double f_of_y = this->callFunction(y);
+        // Metropolis acceptance criterion
+        double A = std::min((f_of_y / f_of_x_i), 1.0);
+        
+        //Step 4. & 5.
+        // get 0 <= T <=1
+        std::srand(std::time({}));
+        float random_int_2 = rand();
+        float T = random_int_2 / RAND_MAX;
+
+        if (T < A) {
+            // Accept, add to list of samples
+            samples.push_back(y);
+            x_i = y; // Move to new point
+        } else {
+        x_i = x_i; // don't change: end samples essentially?
+        }
+    }
+    return samples;
+}
+
+
+
+
+
 
 //Function which handles generating the gnuplot output, called in destructor
 //If an m_plot... flag is set, the we must have filled the related data vector

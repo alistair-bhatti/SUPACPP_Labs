@@ -23,16 +23,19 @@ public:
   void plotData(std::vector<double> &points, int NBins, bool isdata=true); //NB! use isdata flag to pick between data and sampled distributions
   virtual void printInfo(); //Dump parameter info about the current function (Overridable)
   virtual double callFunction(double x); //Call the function with value x (Overridable)
-
   //Protected members can be accessed by child classes but not users
+std::vector<double> metropolisSample(int Npoints, float standard_deviation); //Metropolis sampling of the function to generate Npoints samples
 protected:
   double m_RMin;
   double m_RMax;
   double m_Integral;
+  //double m_x_i;
+  //double m_y;
   int m_IntDiv = 0; //Number of division for performing integral
   std::string m_FunctionName;
   std::string m_OutData; //Output filename for data
   std::string m_OutPng; //Output filename for plot
+  //std::vector< std::pair<double,double> > m_samples_metro; //Holder for metropolis sampled data
   std::vector< std::pair<double,double> > m_data; //input data points to plot
   std::vector< std::pair<double,double> > m_samples; //Holder for randomly sampled data 
   std::vector< std::pair<double,double> > m_function_scan; //holder for data from scanFunction (slight hack needed to plot function in gnuplot)
