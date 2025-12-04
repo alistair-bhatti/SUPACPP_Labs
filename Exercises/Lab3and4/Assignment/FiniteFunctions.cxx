@@ -187,7 +187,8 @@ std::vector< double > FiniteFunction::metropolisSample(int Npoints, float standa
     std::vector<double> samples; // stores the final samples
 
     // Steps 1. - only run once, then loop over steps 3. to 5.
-    // chrono for random from https://stackoverflow.com/questions/60721093/random-number-from-normal-distribution-in-c
+    // chrono for setting radnom seed flow is from 
+    // https://stackoverflow.com/questions/60721093/random-number-from-normal-distribution-in-c
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
     std::srand(std::time({})); // use current time as seed for random generator x_i
