@@ -7,7 +7,7 @@
 #include <fstream>
 
 int main(){
-    // Define function range, data file, hsitograms bins
+    // Define function range, data file, histogram bins etc
     float R_min = -10.0;
     float R_max = 10.0;
     std::string data_filename = "Outputs/data/MysteryData15020.txt";
@@ -17,6 +17,12 @@ int main(){
     float metro_standard_deviation = 10.0; // for getting y. - 3.0 works ok
     int metro_samples = 10000;
 
+
+
+
+    std::cout << "----------------------------------------" << std::endl;
+    std::cout << "Now testing default inv square distribution" << std::endl;
+    std::cout << "----------------------------------------" << std::endl;
 
     // create default FiniteFunction test object 
     FiniteFunction ff;
@@ -56,10 +62,6 @@ int main(){
     //---
 
     ff.setOutfile("default function and data");
-    
-    std::cout << "----------------------------------------" << std::endl;
-    std::cout << "Now testing default inv square distribution" << std::endl;
-    std::cout << "----------------------------------------" << std::endl;
 
     //binned data
     ff.plotData(ff_points_from_data, N_bins, true);
